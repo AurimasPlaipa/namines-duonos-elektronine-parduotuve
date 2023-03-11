@@ -1,0 +1,53 @@
+{% include 'header.html' %}
+{% extends 'base.html' %}
+
+
+{% block title %} Namines duonos elektronine parduotuvė {% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            {% for item in all_items.items %}
+                <div class="card-deck main-page-item">
+                    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3">
+                        <div class="card">
+                            <div class="image-text-holder">
+                                <a href="{{ url_for('selected_item', item_id=item.id) }}">
+                                    <img src="{{ item.photo_url }}" class="card-img-top card-id img-fluid">
+                                </a>
+                                <a href="{{ url_for('selected_item', item_id=item.id) }}" class="image-text">Daugiau informacijos <i class="fas fa-search"></i></a>
+                            </div>
+                            <div class="card-body">
+                                <h4>{{ item.name }}</h4>
+                                
+                                    {% if item.supply >= 1%}
+                                         <div class="buy d-flex justify-content-between align-items-center">
+                                            <div class="text-black font-weight-bold">
+                                                <h5 class="mt-2">{{ item.price }}€</h5>
+                                            </div>
+                                             <a href="{{ url_for('add_item_to_bag', item_id=item.id) }}" class="btn btn-secondary btn-sm">
+                                                <i class="fas fa-shopping-cart">
+
+                                                </i>Pridėti į krepšelį</a>
+                                          </div>
+                                    {% else %}
+                                        <button class="btn btn-secondary" disabled>Nėra</button>
+                                    {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="paginate-buttons">
+            {% for page in all_items.iter_pages(left_edge=3, right_edge=3) %}
+                {% if page %}
+                    <a class="btn btn-secondary mb-4" href="{{ url_for('home', page=page) }}">{{ page }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+   
+
+
+{% endblock %}

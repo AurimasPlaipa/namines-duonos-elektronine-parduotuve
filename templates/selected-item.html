@@ -1,0 +1,47 @@
+{% include 'header.html' %}
+{% extends 'base.html' %}
+
+
+{% block title %} {{ requested_item.name }} {% endblock %}
+{% block content %}
+<div class="container selected-item">
+    <div class="card mb-3 w-75">
+        <div class="row g-0">
+            <img src="{{ '../' + requested_item.photo_url }}" class="img-fluid selected-item-image">
+            <div class="card-body">
+                <div class="selected-item-detail">
+                    <h4 class="card-title">{{requested_item.name}}</h4>
+                    <ul class="list-group list-group-flush">
+                         
+                        <li class="list-group-item">
+                            {{ requested_item.type }}
+                        </li>
+                        <li class="list-group-item text-black font-weight-bold">
+                             {{ requested_item.price }} €
+                        </li>
+                        <li class="list-group-item">
+                            Dydis {{ requested_item.size }}
+                        </li>
+                        <li class="list-group-item">
+                            Turime {{ requested_item.supply }} vienetą /-us
+                        </li>
+                        <li class="list-group-item">
+                             {{ requested_item.description }}
+                        </li>
+                    </ul>
+                    <div class="card-body">
+                        {% if requested_item.supply >= 1 %}
+                            <a href="{{ url_for('add_item_to_bag', item_id=requested_item.id) }}" class="btn btn-secondary"><i class="fas fa-shopping-cart"></i>Pridėti į krepšelį</a>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled>Not on Stock</button>
+                        {% endif %}
+                        {% if current_user.id == 1: %}
+                            <a href="{{ url_for('delete_item', item_id=requested_item.id) }}" class="btn btn-secondary">Pašalinti</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
