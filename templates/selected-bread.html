@@ -2,7 +2,7 @@
 {% extends 'base.html' %}
 
 
-{% block title %} {{ requested_item.name }} {% endblock %}
+{% block title %} {{ requested_bread.name }} {% endblock %}
 {% block content %}
 <div class="container selected-item">
     <div class="card mb-3 w-75">
@@ -33,7 +33,7 @@
                         {% if requested_item.supply >= 1 %}
                             <a href="{{ url_for('add_item_to_bag', item_id=requested_item.id) }}" class="btn btn-secondary"><i class="fas fa-shopping-cart"></i>Pridėti į krepšelį</a>
                         {% else %}
-                            <button class="btn btn-secondary" disabled>Not on Stock</button>
+                            <button class="btn btn-secondary" disabled>Atsiprašome, šios duonos neturime</button>
                         {% endif %}
                         {% if current_user.id == 1: %}
                             <a href="{{ url_for('delete_item', item_id=requested_item.id) }}" class="btn btn-secondary">Pašalinti</a>

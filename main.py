@@ -1,6 +1,6 @@
 from flask import Flask, render_template, url_for, redirect, flash, request, abort
 from flask_bootstrap import Bootstrap
-from forms import LoginForm, RegisterForm, ItemForm
+from forms import LoginForm, RegisterForm, BreadForm
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, logout_user, LoginManager, login_required, current_user
@@ -17,7 +17,8 @@ Bootstrap(app)
 app.config["SECRET_KEY"] = "444517abrsėįšįę147823čęį09ūįę"
 
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://doadmin:AVNS_7nz0lfQics5hLTQxMgz@ecommerce-do-user-13717700-0.b.db.ondigitalocean.com:25060/defaultdb"
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' +  os.path.join(basedir, 'data.db')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
@@ -52,10 +53,11 @@ class User(UserMixin, db.Model):
     purchases = relationship("Purchase", back_populates="purchaser")
 
 
-class Item(db.Model):
-    __tablename__ = "items"
+class Bread(db.Model):
+    __tablename__ = "breads"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Integer, nullable=False)
+    # sex = db.Column(db.String(100), nullable=False)
     type = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     supply = db.Column(db.Integer, nullable=False)
@@ -63,7 +65,24 @@ class Item(db.Model):
     description = db.Column(db.String(2000), nullable=False)
     photo_url = db.Column(db.Integer, nullable=False)
     # Parent
-    purchase = relationship("Purchase", back_populates="item")
+    purchase = relationship("Purchase", back_populates="bread")
+
+class Bread:
+    def __init__(self, name, description, price):
+        self.name = name
+        self.description = description
+        self.price = price
+def query(self):
+        # metodas veiksmai
+
+    my_bread = Bread("Naminė duona su saulėgrąžomis, moliūgų sėklomis ir kanapių sėklomis ", "Ruginių ir kvietinių miltų duona, kepta naudojant natūralų raugą. Duona su saulėgrąžomis, moliūgų sėklomis ir kanapių sėklomis", 8.00),
+    my_bread = Bread("Naminė duona su saulėgrąžomis ir moliūgų sėklomis", "Ruginių ir kvietinių miltų duona, kepta naudojant natūralų raugą. Duona su saulėgrąžomis ir moliūgų sėklomis", 7.00),
+    my_bread = Bread("Naminė duona su saulėgrąžomis ir kanapių sėklomis", "Ruginių ir kvietinių miltų duona, kepta naudojant natūralų raugą. Duona su saulėgražomis ir kanapių sėklomis", 7.00),
+    my_bread = Bread("Naminė duona su kmynais", "Ruginių ir kvietinių miltų duona, kepta naudojant natūralų raugą. Duona su kmynais", 6.00),
+    my_bread = Bread("Ruginių ir kvietinių miltų duona", "Su saulėgrąžomis", 6.00),
+    my_bread = Bread("Ruginių ir kvietinių miltų duona", "Su riešutais ir medumi", 6.00),
+    my_bread = Bread("Ruginių ir kvietinių miltų duona", "Su vaisiais", 7.00)
+    my_bread.query()
 
 
 class Purchase(db.Model):
@@ -75,8 +94,8 @@ class Purchase(db.Model):
     purchaser_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     purchaser = relationship("User", back_populates="purchases")
 
-    item_id = db.Column(db.Integer, db.ForeignKey("items.id"))
-    item = relationship("Item", back_populates="purchase")
+    bread_id = db.Column(db.Integer, db.ForeignKey("breads.id"))
+    bread = relationship("Item", back_populates="purchase")
 
 with app.app_context():
     db.create_all()
@@ -86,15 +105,18 @@ with app.app_context():
 @app.route("/")
 def home():
     page = request.args.get('page', 1, type=int)
-    all_items = Item.query.paginate(page=page, per_page=8, error_out=True)
-    return render_template("index.html", all_items=all_items)
+    all_breads = Bread.query.paginate(page=page, per_page=8, error_out=True)
+    return render_template("index.html", all_breads=all_breads)
 
+# @app.route("/")
+# def home():
+#     return render_template("home.html", breads=breads)
 
 @app.route("/items/<string:q>")
 def selected_query(q):
     
-    all_items = Item.query.filter_by(sex=q)
-    return render_template("selected-query.html", all_items=all_items)
+    all_breads = Bread.query.filter_by(name=q)
+    return render_template("selected-query.html", all_breads=all_breads)
 
 
 @app.route("/my-bag")
@@ -105,7 +127,7 @@ def my_bag_page():
 
     in_cart = db.session.query(Purchase).filter(Purchase.purchaser_id == current_user.id, Purchase.paid is not True)
     in_cart = [pur.item_id for pur in in_cart]
-    products_in_cart = [product for product in Item.query.all() if product.id in in_cart]
+    products_in_cart = [product for product in Bread.query.all() if product.id in in_cart]
     total_price = 0
     for product in products_in_cart:
         total_price += product.price
@@ -114,13 +136,13 @@ def my_bag_page():
 
 @app.route("/to-bag")
 def add_item_to_bag():
-    item_id = request.args.get("item_id")
+    bread_id = request.args.get("bread_id")
     if not current_user.is_anonymous:
-        existing_purchase = db.session.query(Purchase).filter(Purchase.item_id == item_id).first()
+        existing_purchase = db.session.query(Purchase).filter(Purchase.bread_id == bread_id).first()
         print(existing_purchase)
         if not existing_purchase:
             # new purchase
-            purchase = Purchase(paid=False, purchaser_id=current_user.get_id(), item_id=item_id)
+            purchase = Purchase(paid=False, purchaser_id=current_user.get_id(), bread_id=bread_id)
             
             db.session.add(purchase)
             db.session.commit()
@@ -134,8 +156,8 @@ def add_item_to_bag():
 
 @app.route("/delete-from-bag")
 def delete_from_bag():
-    item_id = request.args.get("item_id")
-    purchase = db.session.query(Purchase).filter(Purchase.item_id == item_id).first()
+    bread_id = request.args.get("bread_id")
+    purchase = db.session.query(Purchase).filter(Purchase.bread_id == bread_id).first()
     if purchase:
         db.session.delete(purchase)
         db.session.commit()
@@ -199,14 +221,15 @@ def log_out():
 
 @app.route("/add-item", methods=["GET", "POST"])
 @admin_required
-def add_item():
-    form = ItemForm()
+def add_bread():
+    form = BreadForm()
     if form.validate_on_submit():
         filename = secure_filename(form.photo.data.filename)
         form.photo.data.save('static/uploads/' + filename)
 
-        new_item = Item(
+        new_bread = Bread(
             name=form.name.data.title(),
+            # sex=form.sex.data.title(),
             type=form.type.data.title(),
             price=form.price.data,
             supply=form.supply.data,
@@ -215,26 +238,26 @@ def add_item():
             photo_url='static/uploads/' + filename
         )
         # Add item to DB
-        db.session.add(new_item)
+        db.session.add(new_bread)
         db.session.commit()
-        return redirect(url_for("add_item"))
+        return redirect(url_for("add_bread"))
 
-    return render_template("add-item.html", form=form)
-
-
-@app.route("/add-item/<int:item_id>")
-def selected_item(item_id):
-
-    requested_item = Item.query.get(item_id)
-    return render_template("selected-item.html", requested_item=requested_item)
+    return render_template("add-bread.html", form=form)
 
 
-@app.route("/delete-item/<int:item_id>")
+@app.route("/add-bread/<int:bread_id>")
+def selected_bread(bread_id):
+
+    requested_bread = Bread.query.get(bread_id)
+    return render_template("selected-bread.html", requested_bread=requested_bread)
+
+
+@app.route("/delete-bread/<int:bread_id>")
 @admin_required
-def delete_item(item_id):
+def delete_bread(bread_id):
     
-    item_to_delete = Item.query.get(item_id)
-    db.session.delete(item_to_delete)
+    bread_to_delete = Bread.query.get(bread_id)
+    db.session.delete(bread_to_delete)
     db.session.commit()
     flash("Prekė pašalinta iš krepšelio")
     return redirect(url_for("home"))
