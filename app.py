@@ -11,6 +11,7 @@ import os
 
 
 app = Flask(__name__)
+app.app_context().push()
 Bootstrap(app)
 
 
@@ -50,39 +51,29 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(300), nullable=False)
 
 
-    purchases = relationship("Purchase", back_populates="purchaser")
+    # purchases = relationship("Purchase", back_populates="purchaser")
 
 
 class Bread(db.Model):
     __tablename__ = "breads"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(200), nullable=False)
     # sex = db.Column(db.String(100), nullable=False)
-    type = db.Column(db.String(100), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    supply = db.Column(db.Integer, nullable=False)
-    size = db.Column(db.Integer, nullable=False)
+    # type = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Float(precision=2), nullable=False)
+    # supply = db.Column(db.Integer, nullable=False)
+    # size = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(2000), nullable=False)
-    photo_url = db.Column(db.Integer, nullable=False)
+    # photo_url = db.Column(db.Integer, nullable=False)
     # Parent
-    purchase = relationship("Purchase", back_populates="bread")
+    # purchase = relationship("Purchase", back_populates="bread")
 
-class Bread:
     def __init__(self, name, description, price):
         self.name = name
         self.description = description
         self.price = price
-def query(self):
-        # metodas veiksmai
+        
 
-    my_bread = Bread("Naminė duona su saulėgrąžomis, moliūgų sėklomis ir kanapių sėklomis ", "Ruginių ir kvietinių miltų duona, kepta naudojant natūralų raugą. Duona su saulėgrąžomis, moliūgų sėklomis ir kanapių sėklomis", 8.00),
-    my_bread = Bread("Naminė duona su saulėgrąžomis ir moliūgų sėklomis", "Ruginių ir kvietinių miltų duona, kepta naudojant natūralų raugą. Duona su saulėgrąžomis ir moliūgų sėklomis", 7.00),
-    my_bread = Bread("Naminė duona su saulėgrąžomis ir kanapių sėklomis", "Ruginių ir kvietinių miltų duona, kepta naudojant natūralų raugą. Duona su saulėgražomis ir kanapių sėklomis", 7.00),
-    my_bread = Bread("Naminė duona su kmynais", "Ruginių ir kvietinių miltų duona, kepta naudojant natūralų raugą. Duona su kmynais", 6.00),
-    my_bread = Bread("Ruginių ir kvietinių miltų duona", "Su saulėgrąžomis", 6.00),
-    my_bread = Bread("Ruginių ir kvietinių miltų duona", "Su riešutais ir medumi", 6.00),
-    my_bread = Bread("Ruginių ir kvietinių miltų duona", "Su vaisiais", 7.00)
-    my_bread.query()
 
 
 class Purchase(db.Model):
@@ -92,10 +83,10 @@ class Purchase(db.Model):
 
     # Relationships
     purchaser_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    purchaser = relationship("User", back_populates="purchases")
+    # purchaser = relationship("User", back_populates="purchases")
 
-    bread_id = db.Column(db.Integer, db.ForeignKey("breads.id"))
-    bread = relationship("Item", back_populates="purchase")
+    # bread_id = db.Column(db.Integer, db.ForeignKey("breads.id"))
+    # bread = relationship("Item", back_populates="purchase")
 
 with app.app_context():
     db.create_all()
@@ -264,6 +255,7 @@ def delete_bread(bread_id):
     
 
 if __name__ == '__main__':
-    app.run(port=8001, debug=True)
+    app.run(host='127.0.0.1', port=8001, debug=True)
+    db.create_all()
 
 
